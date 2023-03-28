@@ -97,7 +97,7 @@ def take_photo():
 
 # "handle_button" will be called every time a button is pressed
 # It receives one argument: the associated input pin.
-def handle_button(pin, image_files, ):
+def handle_button(pin):
     if pin == 16:
         print ("delete current image")
 
