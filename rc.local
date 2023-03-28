@@ -18,6 +18,6 @@ if [ "$_IP" ]; then
 fi
 
 #Take photo
-sudo python /home/kaloyan/Desktop/camera-display.py &
+sudo python /home/kaloyan/camera/camera-display.py &
 
 exit 0
