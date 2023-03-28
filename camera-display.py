@@ -15,7 +15,11 @@ from inky.inky_uc8159 import CLEAN
 image_files = []
 current_index = -1
 
+#Inky settings
+inky = auto(ask_user=True, verbose=True)
+
 def clear_display():
+    global inky
     for _ in range(2):
         for y in range(inky.height - 1):
             for x in range(inky.width - 1):
@@ -25,6 +29,7 @@ def clear_display():
         sleep(5)
 
 def display_image(path):
+    global inky
     try:
         image = Image.open(path)
     except UnidentifiedImageError:
@@ -44,19 +49,25 @@ def get_image_files():
     image_files.sort()
     if len(image_files) > 0:
         current_index = len(image_files) - 1
-        display_image(image_files[current_index])
+        #if line below is uncommented, it means on launch the screen will refresh to show last photo
+        #not necessarily desired
+        #display_image(image_files[current_index])
 
 def show_prev_image():
     global current_index
     if current_index > 0:
         current_index -= 1
         display_image(image_files[current_index])
+    else:
+        print("no previous image")
 
 def show_next_image():
     global current_index
     if current_index < len(image_files) - 1:
         current_index += 1
         display_image(image_files[current_index])
+    else:
+        print("no next image")
 
 def delete_current_image():
     global image_files, current_index
@@ -67,6 +78,10 @@ def delete_current_image():
     del image_files[current_index]
     if current_index == len(image_files):
         current_index -= 1
+    if current_index > 0:
+        #to display previous image, not next
+        current_index -= 1
+    print("deleted image")    
     if len(image_files) > 0:
         display_image(image_files[current_index])
     else:
@@ -75,7 +90,7 @@ def delete_current_image():
 def save_image(image):
     global image_files, current_index
     current_index = len(image_files)
-    image_path = "image" + str(current_index) + ".jpg"
+    image_path = "images/image" + str(current_index) + ".jpg"
     image_files.append(image_path)
     image.save(image_path, 'JPEG')
     print(f"Saved image to {image_path}")
@@ -100,6 +115,7 @@ def take_photo():
 def handle_button(pin):
     if pin == 16:
         print ("delete current image")
+        delete_current_image()
 
     if pin == 24:
         print("photo time")
@@ -120,18 +136,17 @@ def main():
     # with a "PULL UP", which weakly pulls the input signal to 3.3V.
     GPIO.setup(BUTTONS, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 
-    #Inky settings
-    inky = auto(ask_user=True, verbose=True)
-    saturation = 0.7
-
     #Get current filesystem, last current_index
     get_image_files()
     current_index = 0
+    
+    print("Setup ready")
 
     #Add button event detect
     for pin in BUTTONS:
-        GPIO.add_event_detect(pin, GPIO.FALLING, handle_button, bouncetime=250)
+        GPIO.add_event_detect(pin, GPIO.FALLING, handle_button, bouncetime=30000)
+        #bouncetime was 250ms, changed to 30s to prevent clicking while screen is changing 
     signal.pause()
-
+    
 if __name__ == "__main__":
     main()
