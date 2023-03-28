@@ -37,6 +37,7 @@ def display_image(path):
         clear_display()
         return
     #Display image
+    print("displaying: ", image_files[current_index], "index: ", current_index)
     saturation = 0.7
     inky.set_image(image, saturation=saturation)
     inky.show()
@@ -52,48 +53,63 @@ def get_image_files():
         #if line below is uncommented, it means on launch the screen will refresh to show last photo
         #not necessarily desired
         #display_image(image_files[current_index])
+    print("current_index: ", current_index, " image_files: ", image_files)    
 
 def show_prev_image():
     global current_index
     if current_index > 0:
         current_index -= 1
+        print("current_index: ", current_index, " image_files: ", image_files)    
         display_image(image_files[current_index])
     else:
         print("no previous image")
+        print("current_index: ", current_index, " image_files: ", image_files)    
 
 def show_next_image():
     global current_index
     if current_index < len(image_files) - 1:
         current_index += 1
+        print("current_index: ", current_index, " image_files: ", image_files)    
         display_image(image_files[current_index])
     else:
         print("no next image")
+        print("current_index: ", current_index, " image_files: ", image_files)    
+
 
 def delete_current_image():
     global image_files, current_index
     if len(image_files) == 0:
         print("No images to delete.")
         return
+    print("deleting: ", image_files[current_index], "index: ", current_index)
     os.remove(image_files[current_index])
     del image_files[current_index]
     if current_index == len(image_files):
         current_index -= 1
-    if current_index > 0:
+    elif current_index > 0:
         #to display previous image, not next
         current_index -= 1
-    print("deleted image")    
+    print("current_index: ", current_index, " image_files: ", image_files)
     if len(image_files) > 0:
         display_image(image_files[current_index])
     else:
-        clear_display()
+        print("clear display")
+        #clear_display()
 
 def save_image(image):
     global image_files, current_index
     current_index = len(image_files)
-    image_path = "images/image" + str(current_index) + ".jpg"
+    free_name_index = current_index;
+    image_id = str(free_name_index).zfill(5)
+    image_path = "images/" + image_id + ".jpg"
+    while image_path in image_files:
+        free_name_index += 1;
+        image_id = str(free_name_index).zfill(5)
+        image_path = "images/" + image_id + ".jpg"
     image_files.append(image_path)
     image.save(image_path, 'JPEG')
     print(f"Saved image to {image_path}")
+    print("current_index: ", current_index, " image_files: ", image_files)
     display_image(image_path)
 
 def take_photo():
@@ -145,7 +161,7 @@ def main():
     #Add button event detect
     for pin in BUTTONS:
         GPIO.add_event_detect(pin, GPIO.FALLING, handle_button, bouncetime=30000)
-        #bouncetime was 250ms, changed to 30s to prevent clicking while screen is changing 
+        #bouncetime was 250ms, changed to 30000 ms to prevent clicking while screen is changing 
     signal.pause()
     
 if __name__ == "__main__":
